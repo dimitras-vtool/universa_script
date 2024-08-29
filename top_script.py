@@ -15,7 +15,9 @@ def find_ports(inst_file):
     
     with open(inst_file, "r") as file:
         lines = file.readlines()     # Read the file and make each line an item in the list 'lines'
+        
         lines_iter = iter(lines)
+        
         for line in lines_iter:
             line = line.strip()      # Strip the lines items from whitespace
             if "module" in line:                                           # The re.search function searches the string line for 
@@ -25,20 +27,27 @@ def find_ports(inst_file):
                     
             if "parameter" in line:                                        
                 param = re.findall(r'\b\w+\b', line.split("parameter")[-1])  
-                parameter_names = [param[0]]
+                parameter_names = [param[0]]            # Only the first part is the parameter name
                 parameters.extend(parameter_names)
             
             port_names   = ""
             
             if "(" in line:
-                port_section = ""
+                port_section = line     #Initializes port_section with the current line. This variable will be used to accumulate all lines that are part of the port declaration section.
+                while ")" not in line:
+                    line = next(lines_iter, "").strip()
+                    port_section += " " + line
+                port_section += " " + line
                 for port_type in ports:                                                                 # The re.finall finds all whole words in the substring obtained after port_type.
-                    if port_type in line:
-                        port_section = line.split(port_type)[-1]                                        # r'\b\w+\b': This is the regex pattern used to match word sequences.
+                    if port_type in port_section:
+                       # port_section = line.split(port_type)[-1]                                       # r'\b\w+\b': This is the regex pattern used to match word sequences.
                         port_names = re.findall(r'\b(\w+)\s*(?:\[.*?\])?\s*(?:,\s*)?', port_section)    #line.split(port_type): This splits the string line into a list of substrings, 
-                                                                                                        #using port_type as the delimiter.
+                        #print(f"Extracted port names: {port_names}")                                                                                #using port_type as the delimiter.
                                                                                                         # [-1]: Retrieves the last element of the list resulting from the split operation.  
-                        ports[port_type].extend(port_names)  # "ports" is a dictionary and port_type is a key. So ports[port_type] is the list, stored in the dictionary,                                
+                        filtered_ports = [name for name in port_names if name not in ports]
+                        if filtered_ports:
+                            ports[port_type].extend(filtered_ports[-1:])
+                        #ports[port_type].extend(port_names)    # "ports" is a dictionary and port_type is a key. So ports[port_type] is the list, stored in the dictionary,                                
                                                                 # assocaited with the particular port_type key.
                                                                 # .extend(port_names): It's a method that adds all elements of port_names (which is a list) to the list ports[port_type]. So, now the port names are all saved in the list. 
                                                                 
@@ -50,7 +59,6 @@ def find_ports(inst_file):
     #For debugging
     print(f"Port types: {port_type}")
     print(f"Port section: {port_section}")
-    print(f"Extracted port names: {port_names}")
     return module_name, parameters, ports
 
 
@@ -71,16 +79,16 @@ def create_inst_in_wrapper(wrapper_file, module_name, ports, parameters):
                 file.write(f"       .{parameter}(),\n")  # Comma for all other ports
         file.write(f"   )\n")                           
         
-        file.write(f"   {module_name}_inst (\n")             # Write instance name
+        file.write(f"   {module_name}_inst (\n")         # Write instance name
         
         all_ports = ports["input"] + ports["output"] + ports["inout"] 
         for i, port in enumerate(all_ports): 
-            if i == len(all_ports) - 1:  # Check if it's the last port
+            if i == len(all_ports) - 1:              # Check if it's the last port
                 file.write(f"        .{port}()\n")   # No comma at the end
             else:
                 file.write(f"        .{port}(),\n")  # Comma for all other ports
                 
-        file.write("    );\n\n")                           # Close instantiation
+        file.write("    );\n\n")                     # Close instantiation
 
 
 ############################################
