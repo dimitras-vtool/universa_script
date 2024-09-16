@@ -2,19 +2,70 @@
 /*                 Clock and reset assign                    */
 /*                                                           */
 /*###########################################################*/
- wire axi_fabric_clk;
- wire axi_fabric_rst_n;
- 
- assign axi_fabric_clk = clk;
- assign axi_fabric_rst_n = rstn;
- 
- 
+
+   wire clk_axi_fabric;
+   wire clk_axi2apb_0;
+   wire PCLK_axi2apb_0;
+   wire clk_axi2apb_1;
+   wire PCLK_axi2apb_1;
+   wire clk_i_gpio;
+   wire clk_timer;
+   wire clk_i2c;
+   wire pclk_i2c;
+   wire pclk_i_spi;
+   wire eclk_i_spi;
+   wire sclk_o_spi;
+   wire sclk_i_spi;
+   wire pclk_i_vt_uart;
+   wire sclk_i_vt_uart;
+   wire clk_blink;
+   wire rst_n_axi_fabric;
+   wire rst_n_axi2apb_0;
+   wire PRESETn_axi2apb_0;
+   wire rst_n_axi2apb_1;
+   wire PRESETn_axi2apb_1;
+   wire rst_n_i_gpio;
+   wire rst_n_timer;
+   wire rstn_i2c;
+   wire prstn_i2c;
+   wire preset_n_i_spi;
+   wire rst_n_i_spi;
+   wire presetn_i_vt_uart;
+   wire rst_n_i_vt_uart;
+   wire rstn_blink;
+    wire clk_blink;
+   wire rstn_blink;
+
+    assign clk_blink = clk;
+
+  assign rstn_blink = rstn; 
+
+
+   assign axi_fabric_clk = clk;
+   assign axi2apb_0_clk = clk;
+   assign axi2apb_1_clk = clk;
+   assign gpio_clk = clk;
+   assign timer_clk = clk;
+   assign i2c_clk = clk;
+   assign spi_clk = clk;
+   assign vt_uart_clk = clk;
+   assign blink_clk = clk;
+
+   assign axi_fabric_rstn = rstn;
+   assign axi2apb_0_rstn = rstn;
+   assign axi2apb_1_rstn = rstn;
+   assign gpio_rstn = rstn;
+   assign timer_rstn = rstn;
+   assign i2c_rstn = rstn;
+   assign spi_rstn = rstn;
+   assign vt_uart_rstn = rstn;
+   assign blink_rstn = rstn;
+
 /*###########################################################*/
-/*                 axi_fabric_top_wrapper interface                   */
-/*                       (Vtool)                             */
+/*                 axi_fabric                       */
 /*###########################################################*/
-   axi_fabric_top_wrapper
-    #(
+axi_fabric_top_wrapper
+ #(
        .SLAVE_N(),
        .MASTER_N(),
        .ADDR_WIDTH(),
@@ -39,8 +90,8 @@
        .M_W_CHANNEL_REG(),
        .S_WR_CHANNEL_REG(),
        .M_WR_CHANNEL_REG()
-   )
-   axi_fabric_top_wrapper_inst (
+)
+axi_fabric_top_wrapper_inst (
         .clk(clk),
         .rst_n(rst_n),
         .s00_axi_awid(s00_axi_awid),
@@ -345,5 +396,371 @@
         .m03_axi_rvalid(m03_axi_rvalid),
         .m03_axi_ruser(m03_axi_ruser),
         .m03_axi_rready(m03_axi_rready)
-    );
+);
+
+/*###########################################################*/
+/*                 axi2apb_0                       */
+/*###########################################################*/
+axi2apb_0_wrapper
+ #(
+       .AXI_ID_length(),
+       .AXI_addr_length(),
+       .AXI_data_length(),
+       .AXI_strb_length(),
+       .APB_addr_length(),
+       .APB_data_length(),
+       .APB_strb_length(),
+       .num_of_slaves()
+)
+axi2apb_0_wrapper_inst (
+        .AWID(AWID),
+        .AWADDR(AWADDR),
+        .AWLEN(AWLEN),
+        .AWSIZE(AWSIZE),
+        .AWBURST(AWBURST),
+        .AWVALID(AWVALID),
+        .AWREADY(AWREADY),
+        .WDATA(WDATA),
+        .WSTRB(WSTRB),
+        .WLAST(WLAST),
+        .WVALID(WVALID),
+        .WREADY(WREADY),
+        .BID(BID),
+        .BRESP(BRESP),
+        .BVALID(BVALID),
+        .BREADY(BREADY),
+        .ARID(ARID),
+        .ARADDR(ARADDR),
+        .ARLEN(ARLEN),
+        .ARSIZE(ARSIZE),
+        .ARBURST(ARBURST),
+        .ARVALID(ARVALID),
+        .ARREADY(ARREADY),
+        .RID(RID),
+        .RDATA(RDATA),
+        .RRESP(RRESP),
+        .RLAST(RLAST),
+        .RVALID(RVALID),
+        .RREADY(RREADY),
+        .s04_apb_PADDR(s04_apb_PADDR),
+        .s04_apb_PSEL(s04_apb_PSEL),
+        .s04_apb_PENABLE(s04_apb_PENABLE),
+        .s04_apb_PWRITE(s04_apb_PWRITE),
+        .s04_apb_PWDATA(s04_apb_PWDATA),
+        .s04_apb_PREADY(s04_apb_PREADY),
+        .s04_apb_PRDATA(s04_apb_PRDATA),
+        .s04_apb_PSLVERR(s04_apb_PSLVERR),
+        .s04_apb_PPROT(s04_apb_PPROT),
+        .s04_apb_PSTRB(s04_apb_PSTRB),
+        .s03_apb_PADDR(s03_apb_PADDR),
+        .s03_apb_PSEL(s03_apb_PSEL),
+        .s03_apb_PENABLE(s03_apb_PENABLE),
+        .s03_apb_PWRITE(s03_apb_PWRITE),
+        .s03_apb_PWDATA(s03_apb_PWDATA),
+        .s03_apb_PREADY(s03_apb_PREADY),
+        .s03_apb_PRDATA(s03_apb_PRDATA),
+        .s03_apb_PSLVERR(s03_apb_PSLVERR),
+        .s03_apb_PPROT(s03_apb_PPROT),
+        .s03_apb_PSTRB(s03_apb_PSTRB),
+        .s02_apb_PADDR(s02_apb_PADDR),
+        .s02_apb_PSEL(s02_apb_PSEL),
+        .s02_apb_PENABLE(s02_apb_PENABLE),
+        .s02_apb_PWRITE(s02_apb_PWRITE),
+        .s02_apb_PWDATA(s02_apb_PWDATA),
+        .s02_apb_PREADY(s02_apb_PREADY),
+        .s02_apb_PRDATA(s02_apb_PRDATA),
+        .s02_apb_PSLVERR(s02_apb_PSLVERR),
+        .s02_apb_PPROT(s02_apb_PPROT),
+        .s02_apb_PSTRB(s02_apb_PSTRB),
+        .s01_apb_PADDR(s01_apb_PADDR),
+        .s01_apb_PPROT(s01_apb_PPROT),
+        .s01_apb_PSTRB(s01_apb_PSTRB),
+        .s01_apb_PSEL(s01_apb_PSEL),
+        .s01_apb_PENABLE(s01_apb_PENABLE),
+        .s01_apb_PWDATA(s01_apb_PWDATA),
+        .s01_apb_PWRITE(s01_apb_PWRITE),
+        .s01_apb_PRDATA(s01_apb_PRDATA),
+        .s01_apb_PREADY(s01_apb_PREADY),
+        .s01_apb_PSLVERR(s01_apb_PSLVERR),
+        .s00_apb_PADDR(s00_apb_PADDR),
+        .s00_apb_PPROT(s00_apb_PPROT),
+        .s00_apb_PSTRB(s00_apb_PSTRB),
+        .s00_apb_PSEL(s00_apb_PSEL),
+        .s00_apb_PENABLE(s00_apb_PENABLE),
+        .s00_apb_PWDATA(s00_apb_PWDATA),
+        .s00_apb_PWRITE(s00_apb_PWRITE),
+        .s00_apb_PRDATA(s00_apb_PRDATA),
+        .s00_apb_PREADY(s00_apb_PREADY),
+        .s00_apb_PSLVERR(s00_apb_PSLVERR),
+        .clk(clk),
+        .rst_n(rst_n),
+        .PCLK(PCLK),
+        .PRESETn(PRESETn)
+);
+
+/*###########################################################*/
+/*                 axi2apb_1                       */
+/*###########################################################*/
+axi2apb_1_wrapper
+ #(
+       .AXI_ID_length(),
+       .AXI_addr_length(),
+       .AXI_data_length(),
+       .AXI_strb_length(),
+       .APB_addr_length(),
+       .APB_data_length(),
+       .APB_strb_length(),
+       .num_of_slaves()
+)
+axi2apb_1_wrapper_inst (
+        .AWID(AWID),
+        .AWADDR(AWADDR),
+        .AWLEN(AWLEN),
+        .AWSIZE(AWSIZE),
+        .AWBURST(AWBURST),
+        .AWVALID(AWVALID),
+        .AWREADY(AWREADY),
+        .WDATA(WDATA),
+        .WSTRB(WSTRB),
+        .WLAST(WLAST),
+        .WVALID(WVALID),
+        .WREADY(WREADY),
+        .BID(BID),
+        .BRESP(BRESP),
+        .BVALID(BVALID),
+        .BREADY(BREADY),
+        .ARID(ARID),
+        .ARADDR(ARADDR),
+        .ARLEN(ARLEN),
+        .ARSIZE(ARSIZE),
+        .ARBURST(ARBURST),
+        .ARVALID(ARVALID),
+        .ARREADY(ARREADY),
+        .RID(RID),
+        .RDATA(RDATA),
+        .RRESP(RRESP),
+        .RLAST(RLAST),
+        .RVALID(RVALID),
+        .RREADY(RREADY),
+        .s03_apb_PADDR(s03_apb_PADDR),
+        .s03_apb_PSEL(s03_apb_PSEL),
+        .s03_apb_PENABLE(s03_apb_PENABLE),
+        .s03_apb_PWRITE(s03_apb_PWRITE),
+        .s03_apb_PWDATA(s03_apb_PWDATA),
+        .s03_apb_PREADY(s03_apb_PREADY),
+        .s03_apb_PRDATA(s03_apb_PRDATA),
+        .s03_apb_PSLVERR(s03_apb_PSLVERR),
+        .s03_apb_PPROT(s03_apb_PPROT),
+        .s03_apb_PSTRB(s03_apb_PSTRB),
+        .s02_apb_PADDR(s02_apb_PADDR),
+        .s02_apb_PSEL(s02_apb_PSEL),
+        .s02_apb_PENABLE(s02_apb_PENABLE),
+        .s02_apb_PWRITE(s02_apb_PWRITE),
+        .s02_apb_PWDATA(s02_apb_PWDATA),
+        .s02_apb_PREADY(s02_apb_PREADY),
+        .s02_apb_PRDATA(s02_apb_PRDATA),
+        .s02_apb_PSLVERR(s02_apb_PSLVERR),
+        .s02_apb_PPROT(s02_apb_PPROT),
+        .s02_apb_PSTRB(s02_apb_PSTRB),
+        .s01_apb_PADDR(s01_apb_PADDR),
+        .s01_apb_PPROT(s01_apb_PPROT),
+        .s01_apb_PSTRB(s01_apb_PSTRB),
+        .s01_apb_PSEL(s01_apb_PSEL),
+        .s01_apb_PENABLE(s01_apb_PENABLE),
+        .s01_apb_PWDATA(s01_apb_PWDATA),
+        .s01_apb_PWRITE(s01_apb_PWRITE),
+        .s01_apb_PRDATA(s01_apb_PRDATA),
+        .s01_apb_PREADY(s01_apb_PREADY),
+        .s01_apb_PSLVERR(s01_apb_PSLVERR),
+        .s00_apb_PADDR(s00_apb_PADDR),
+        .s00_apb_PPROT(s00_apb_PPROT),
+        .s00_apb_PSTRB(s00_apb_PSTRB),
+        .s00_apb_PSEL(s00_apb_PSEL),
+        .s00_apb_PENABLE(s00_apb_PENABLE),
+        .s00_apb_PWDATA(s00_apb_PWDATA),
+        .s00_apb_PWRITE(s00_apb_PWRITE),
+        .s00_apb_PRDATA(s00_apb_PRDATA),
+        .s00_apb_PREADY(s00_apb_PREADY),
+        .s00_apb_PSLVERR(s00_apb_PSLVERR),
+        .clk(clk),
+        .rst_n(rst_n),
+        .PCLK(PCLK),
+        .PRESETn(PRESETn)
+);
+
+/*###########################################################*/
+/*                 gpio                       */
+/*###########################################################*/
+gpio_top
+ #(
+       .NUM_OF_PINS(),
+       .PDW(),
+       .PAW()
+)
+gpio_top_inst (
+        .clk_i(clk_i),
+        .rst_n_i(rst_n_i),
+        .paddr_i(paddr_i),
+        .psel_i(psel_i),
+        .penable_i(penable_i),
+        .pwrite_i(pwrite_i),
+        .pwdata_i(pwdata_i),
+        .pstrb_i(pstrb_i),
+        .pready_o(pready_o),
+        .prdata_o(prdata_o),
+        .pslverr_o(pslverr_o),
+        .gpio_input_i(gpio_input_i),
+        .gpio_output_o(gpio_output_o),
+        .gpio_output_en_o(gpio_output_en_o),
+        .irq_o(irq_o),
+        .aux_out_i(aux_out_i),
+        .GPIO(GPIO)
+);
+
+/*###########################################################*/
+/*                 timer                       */
+/*###########################################################*/
+timer_top
+         .clk(clk),
+        .rst_n(rst_n),
+        .apb_paddr(apb_paddr),
+        .apb_pstrb(apb_pstrb),
+        .apb_psel(apb_psel),
+        .apb_penable(apb_penable),
+        .apb_pwdata(apb_pwdata),
+        .apb_pwrite(apb_pwrite),
+        .apb_prdata(apb_prdata),
+        .apb_pready(apb_pready),
+        .apb_pslverr(apb_pslverr),
+        .ch0_timer_i(ch0_timer_i),
+        .ch0_timer_o(ch0_timer_o),
+        .ch1_timer_i(ch1_timer_i),
+        .ch1_timer_o(ch1_timer_o),
+        .timer_irq(timer_irq),
+        .output_ctrl_u0((output_ctrl_u0(),
+        .output_ctrl_u1((output_ctrl_u1()
+);
+
+/*###########################################################*/
+/*                 i2c                       */
+/*###########################################################*/
+i2c_top
+ #(
+       .I2C_EMPTY_FIFO_MODE(),
+       .TX_FIFO_DEPTH(),
+       .RX_FIFO_DEPTH()
+)
+i2c_top_inst (
+        .clk(clk),
+        .rstn(rstn),
+        .pclk(pclk),
+        .prstn(prstn),
+        .paddr(paddr),
+        .psel(psel),
+        .penable(penable),
+        .pwrite(pwrite),
+        .pwdata(pwdata),
+        .pstrb(pstrb),
+        .pprot(pprot),
+        .pready(pready),
+        .prdata(prdata),
+        .pslverr(pslverr),
+        .scl_i(scl_i),
+        .scl_o(scl_o),
+        .scl_oe(scl_oe),
+        .sda_i(sda_i),
+        .sda_o(sda_o),
+        .sda_oe(sda_oe),
+        .irq(irq)
+);
+
+/*###########################################################*/
+/*                 spi                       */
+/*###########################################################*/
+spi_top
+ #(
+       .NR_OF_SLAVES(),
+       .PAW(),
+       .PDW(),
+       .TXFIFOWIDTH(),
+       .TXFIFOD(),
+       .RXFIFOWIDTH(),
+       .RXFIFOD(),
+       .SPI_MASTER(),
+       .SDW(),
+       .XIPE(),
+       .ID(),
+       .declaration()
+)
+spi_top_inst (
+        .pclk_i(pclk_i),
+        .preset_n_i(preset_n_i),
+        .paddr_i(paddr_i),
+        .pprot_i(pprot_i),
+        .psel_i(psel_i),
+        .penable_i(penable_i),
+        .pwrite_i(pwrite_i),
+        .pwdata_i(pwdata_i),
+        .pstrb_i(pstrb_i),
+        .pready_o(pready_o),
+        .prdata_o(prdata_o),
+        .pslverr_o(pslverr_o),
+        .spi_i(spi_i),
+        .spi_o(spi_o),
+        .eclk_i(eclk_i),
+        .rst_n_i(rst_n_i),
+        .scs_o(scs_o),
+        .scs_i(scs_i),
+        .sclk_o(sclk_o),
+        .sclk_i(sclk_i),
+        .xip_en_i(xip_en_i),
+        .chip_sel_i(chip_sel_i),
+        .tri_state_en_o(tri_state_en_o),
+        .request(request)
+);
+
+/*###########################################################*/
+/*                 vt_uart                       */
+/*###########################################################*/
+vt_uart_top
+ #(
+       .FIFO_DEPTH(),
+       .PAW(),
+       .PDW(),
+       .TWO_CLKS()
+)
+vt_uart_top_inst (
+        .pclk_i(pclk_i),
+        .sclk_i(sclk_i),
+        .presetn_i(presetn_i),
+        .rst_n_i(rst_n_i),
+        .paddr_i(paddr_i),
+        .pprot_i(pprot_i),
+        .psel_i(psel_i),
+        .penable_i(penable_i),
+        .pwrite_i(pwrite_i),
+        .pwdata_i(pwdata_i),
+        .pstrb_i(pstrb_i),
+        .pready_o(pready_o),
+        .prdata_o(prdata_o),
+        .pslverr_o(pslverr_o),
+        .cts_n_i(cts_n_i),
+        .dsr_n_i(dsr_n_i),
+        .dcd_n_i(dcd_n_i),
+        .ri_n_i(ri_n_i),
+        .dtr_n_o(dtr_n_o),
+        .rts_n_o(rts_n_o),
+        .tx_o(tx_o),
+        .rx_i(rx_i),
+        .intr_o(intr_o)
+);
+
+/*###########################################################*/
+/*                 blink                       */
+/*###########################################################*/
+blink
+         .clk(clk),
+        .rstn(rstn),
+        .led(led)
+);
 

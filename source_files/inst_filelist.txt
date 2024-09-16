@@ -1,0 +1,9 @@
+../RISCV-SoC/rtl/Interconnect/axi_fabric_top/axi_fabric_top_wrapper.sv
+../RISCV-SoC/rtl/Bridges/axi2apb/axi2apb_0_wrapper.sv
+../RISCV-SoC/rtl/Bridges/axi2apb/axi2apb_1_wrapper.sv
+../RISCV-SoC/rtl/Peripherals/gpio/sv/gpio_top.sv
+../RISCV-SoC/rtl/Peripherals/timer/sv/timer_top.sv
+../RISCV-SoC/rtl/Peripherals/vt_i2c/sv/i2c_top.sv
+../RISCV-SoC/rtl/Peripherals/spi/sv/spi_top.sv
+../RISCV-SoC/rtl/Peripherals/uart/sv/vt_uart_top.sv
+../RISCV-SoC/rtl/Blink/blink.v
