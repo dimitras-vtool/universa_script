@@ -69,7 +69,6 @@ def find_ports(inst_file):
 def remove_from_string(word, substrings):      
     for substring in substrings:
         word = word.replace(substring, "").rstrip("_")                #WHERE IS THIS BEING USED??
-    
     return word
   
 
@@ -85,9 +84,9 @@ def create_clk_wires(wrapper_file, ports, module_name):
         
         clk_ports = [port for port in ports if re.search(r"clk", port, re.IGNORECASE)]         # It is a list, even if it has only one item.
         
-        #for clk_port in clk_ports:
-        #    file.write(f"   wire {clk_port}_{plain_module_name};\n")          # Wire declarations.
-        #print(f" {clk_ports}")    
+        for clk_port in clk_ports:
+            file.write(f"   wire {clk_port}_{plain_module_name};\n")          # Wire declarations.
+        #print(f" clk of {module_name} : {clk_ports}")  
     return clk_ports                 
      
      
@@ -96,13 +95,14 @@ def create_reset_wires(wrapper_file, ports, module_name):
         #Reset signals
     with open(wrapper_file, "a") as file:    
     
-        reset_names = ["rst_n", "reset_n", "reset"]
+        reset_names = ["rst_n", "reset_n", "rstn", "reset"]
         
-        n_reset_ports = [port for port in ports if any(reset_name in port.lower() for reset_name in reset_names)]
+        n_reset_ports = [port for port in ports if any(re.search(reset_name, port, re.IGNORECASE) for reset_name in reset_names)]
         
-        #for reset_port in n_reset_ports:
-        #    file.write(f"   wire {reset_port}_{plain_module_name};\n")
-            
+        for reset_port in n_reset_ports:
+            file.write(f"   wire {reset_port}_{plain_module_name};\n")
+        #print(f" reset of {module_name} : {n_reset_ports}")    
+
     return n_reset_ports
          
 
@@ -138,6 +138,7 @@ def write_temp_files(clk_ports, n_reset_ports, plain_module_name):
     for rst in n_reset_ports:
         reset_wires_temp.write(f"   wire {rst}_{plain_module_name};\n")
         reset_assign_temp.write(f"  assign {rst}_{plain_module_name} = rstn; \n")
+
     
     clk_wires_temp.seek(0)                                    #rewind the files' cursor at the beginning, for reading
     clk_assign_temp.seek(0)
@@ -145,10 +146,12 @@ def write_temp_files(clk_ports, n_reset_ports, plain_module_name):
     reset_assign_temp.seek(0)
     
     #For debugging
-    print("clk_wires_temp content:", clk_wires_temp.read())
-    print("reset_wires_temp content:", reset_wires_temp.read())
-    print("clk_assign_temp content:", clk_assign_temp.read())
-    print("reset_assign_temp content:", reset_assign_temp.read())
+
+    #print("clk_wires_temp content:", clk_wires_temp.read())
+    #print("reset_wires_temp content:", reset_wires_temp.read())
+    #print("clk_assign_temp content:", clk_assign_temp.read())
+    #print("reset_assign_temp content:", reset_assign_temp.read())
+
     
     return clk_wires_temp, clk_assign_temp, reset_wires_temp, reset_assign_temp
 
@@ -199,27 +202,30 @@ def create_inst_in_wrapper(wrapper_file, module_name, ports, parameters):
         file.write(f"/*###########################################################*/\n")           #FIX SYMMETRY OF THE TITLE COMMENT
         file.write(f"/*                 {plain_module_name}                       */\n")
         file.write(f"/*###########################################################*/\n")
+
+        file.write(f"{module_name}\n ")                    # Write module name
         
-        file.write(f"   {module_name}\n ")     # Write module name
-        file.write(f"   #(\n")
+        if parameters:                                      #If the parameters list is not empty, the condition is true.
         
-        for i, parameter in enumerate(parameters): 
-            if i == len(parameters) - 1:  # Check if it's the last parameter
-                file.write(f"       .{parameter}()\n")   # No comma at the end
-            else:
-                file.write(f"       .{parameter}(),\n")  # Comma for all other ports
-        file.write(f"   )\n")                           
-        
-        file.write(f"   {module_name}_inst (\n")             # Write instance name
+            file.write(f"#(\n")
+            
+            for i, parameter in enumerate(parameters): 
+                if i == len(parameters) - 1:                   # Check if it's the last parameter
+                    file.write(f"       .{parameter}()\n")     # No comma at the end
+                else:
+                    file.write(f"       .{parameter}(),\n")    # Comma for all other ports
+            file.write(f")\n")                           
+            
+            file.write(f"{module_name}_inst (\n")              # Write instance name
         
          
         for i, port in enumerate(ports): 
-            if i == len(ports) - 1:  # Check if it's the last port
+            if i == len(ports) - 1:                        # Check if it's the last port
                 file.write(f"        .{port}({port})\n")   # No comma at the end
             else:
                 file.write(f"        .{port}({port}),\n")  # Comma for all other ports
                 
-        file.write("    );\n\n")                           # Close instantiation
+        file.write(");\n\n")                               # Close instantiation
 
 
 ############################################
@@ -239,14 +245,14 @@ if __name__ == '__main__':
         print("Add the path to the TOP file.")
         exit()
     elif not args.top.endswith((".sv", ".v")):
-        print("The file must have a *.sv or *.v extension.")
+        print("The wrapper file must have a *.sv or *.v extension.")
         exit()
 
     if args.inst == None:
         print("Add the path of the module you want to instantiate")
         exit()
     elif not args.inst.endswith((".txt")):
-        print("The file must have a *.sv or *.v extension.")
+        print("The filelist file must have a *.txt extension.")
         exit()
     else:
         wrapper_file = args.top
@@ -260,7 +266,9 @@ if __name__ == '__main__':
 
     with open(modules_to_instantiate, "r") as file:
         lines = file.readlines()
-        
+    
+    open(wrapper_file, "w").close()                                             # Delete previous contents of the wrapper file.
+    
     with open(wrapper_file, "a") as file:
         file.write(f"/*###########################################################*/\n")
         file.write(f"/*                 Clock and reset assign                    */\n")
@@ -268,7 +276,7 @@ if __name__ == '__main__':
         file.write(f"/*###########################################################*/\n")
         file.write(f"\n")
     
-    with open(wrapper_file, "r") as file:
+    with open(wrapper_file, "a") as file:
         for line in lines:
             line = line.strip()
             inst_file = line
@@ -281,6 +289,7 @@ if __name__ == '__main__':
             module_name, parameters, ports, plain_module_name = find_ports(inst_file)
             n_reset_ports = create_reset_wires(wrapper_file, ports, module_name)
         
+
     clk_wires_temp, clk_assign_temp, reset_wires_temp, reset_assign_temp = write_temp_files(clk_ports, n_reset_ports, plain_module_name)
     write_clk_and_rst_to_wrapper(wrapper_file, clk_wires_temp, clk_assign_temp, reset_wires_temp, reset_assign_temp)
     
@@ -288,21 +297,31 @@ if __name__ == '__main__':
     reset_wires_temp.close()
     clk_assign_temp.close()
     reset_assign_temp.close()
-        
+
+          
+    with open(wrapper_file, "a") as file:    
+        for line in lines:
+            line = line.strip()
+            inst_file = line
+            module_name, parameters, ports, plain_module_name = find_ports(inst_file)     
+            clk_assignments(wrapper_file, clk_ports, plain_module_name)
     
-    #with open(wrapper_file, "a") as file:    
-    #    for line in lines:
-    #        line = line.strip()
-    #        inst_file = line
-    #        module_name, parameters, ports, plain_module_name = find_ports(inst_file)     
-    #        clk_assignments(wrapper_file, clk_ports, plain_module_name)
-    #
-    #with open(wrapper_file, "a") as file:
-    #    file.write(f"\n")
-    #    
-    #with open(wrapper_file, "a") as file:    
-    #    for line in lines:
-    #        line = line.strip()
-    #        inst_file = line
-    #        module_name, parameters, ports, plain_module_name = find_ports(inst_file)     
-    #        reset_assignments(wrapper_file, n_reset_ports, plain_module_name)
+    with open(wrapper_file, "a") as file:
+        file.write(f"\n")
+        
+    with open(wrapper_file, "a") as file:    
+        for line in lines:
+            line = line.strip()
+            inst_file = line
+            module_name, parameters, ports, plain_module_name = find_ports(inst_file)     
+            reset_assignments(wrapper_file, n_reset_ports, plain_module_name)
+            
+    with open(wrapper_file, "a") as file:
+        file.write(f"\n")
+        
+    with open(wrapper_file, "a") as file:    
+        for line in lines:
+            line = line.strip()
+            inst_file = line
+            module_name, parameters, ports, plain_module_name = find_ports(inst_file)
+            create_inst_in_wrapper(wrapper_file, module_name, ports, parameters)
