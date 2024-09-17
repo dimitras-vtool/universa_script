@@ -2,6 +2,7 @@ import re
 import sys
 import argparse
 import tempfile
+import os
 
 ########################################
 # Find the ports and the parameters in #
@@ -146,9 +147,14 @@ def write_clk_and_rst_to_wrapper(wrapper_file, clk_wires_temp, clk_assign_temp, 
 #   with the appropriate bit range   #
 ######################################
 
-#def create_modules_wires(wrapper_file, ports, parameters, module_name):
-
-
+def create_module_interface(wrapper_file, ports, parameters, module_name):  
+   
+    header_text = (f"{plain_module_name} Interface")
+    
+    with open(wrapper_file, "a") as file: 
+        create_centered_comment(wrapper_file, header_text)
+    
+    
 
 
 
@@ -157,14 +163,13 @@ def write_clk_and_rst_to_wrapper(wrapper_file, clk_wires_temp, clk_assign_temp, 
 #   of an instantiation alligned     # 
 ######################################
 
-def create_centered_comment(wrapper_file, plain_module_name):
-    total_length = 60  
-
+def create_centered_comment(wrapper_file, header_text):
     
+    total_length = 60  
     border = "/*" + "#" * (total_length - 6) + "*/\n"
 
     
-    text = f"{plain_module_name} Interface"
+    text = f"{header_text}"
     spaces = total_length - len(text) - 6 
     left_padding = spaces // 2
     right_padding = spaces - left_padding
@@ -193,11 +198,12 @@ def create_centered_comment(wrapper_file, plain_module_name):
 def create_inst_in_wrapper(wrapper_file, module_name, ports, parameters, plain_module_name):
     with open(wrapper_file, "a") as file:
         
-        create_centered_comment(wrapper_file, plain_module_name)
+        header_text = plain_module_name;
+        create_centered_comment(wrapper_file, header_text)
 
-        file.write(f"{module_name}\n")                    # Write module name
+        file.write(f"{module_name}\n")                         # Write module name
         
-        if parameters:                                      #If the parameters list is not empty, the condition is true.
+        if parameters:                                         #If the parameters list is not empty, the condition is true.
         
             file.write(f"#(\n")
             
@@ -231,6 +237,9 @@ def process_lines(lines, wrapper_file):
     reset_ports = []  # To store all reset signals
     
     with open(wrapper_file, "a") as file:
+        file_name = os.path.splitext(os.path.basename(wrapper_file))[0]     #extract the wrappers' file name, from the wrapper_file variablwe that contains the path for the wrapper file
+        file.write(f"module {file_name}(")
+        file.write(f");\n\n")
         # Writing header for clock and reset assignments
         file.write(f"/*###########################################################*/\n")
         file.write(f"/*                 Clock and reset assign                    */\n")
@@ -261,7 +270,10 @@ def process_lines(lines, wrapper_file):
             inst_file = line
             module_name, parameters, ports, plain_module_name = find_ports(inst_file)
             clk_assignments(wrapper_file, clk_ports, plain_module_name)  
-            
+    
+    with open(wrapper_file, "a") as file:
+        file.write(f"\n")
+        
     with open(wrapper_file, "a") as file:
         file.write(f"\n")
         # Fourth loop: Assignments for reset signals
