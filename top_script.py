@@ -219,9 +219,9 @@ def create_inst_in_wrapper(wrapper_file, module_name, ports, parameters, plain_m
          
         for i, port in enumerate(ports): 
             if i == len(ports) - 1:                        # Check if it's the last port
-                file.write(f"        .{port}({port})\n")   # No comma at the end
+                file.write(f"   .{port}({port})\n")   # No comma at the end
             else:
-                file.write(f"        .{port}({port}),\n")  # Comma for all other ports
+                file.write(f"   .{port}({port}),\n")  # Comma for all other ports
                 
         file.write(");\n\n")                               # Close instantiation
 
