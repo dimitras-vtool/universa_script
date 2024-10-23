@@ -1,0 +1,1 @@
+$RTL_PATH/../../rtl/u1_noc_wrapper//sv/axi2apb_0/apb_addr_dec_0/apb_addr_dec_0.sv

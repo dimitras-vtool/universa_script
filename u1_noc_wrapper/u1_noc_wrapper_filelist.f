@@ -1,0 +1,11 @@
+$RTL_PATH/u1_noc_wrapper/sv/u1_noc.sv
+$RTL_PATH/u1_noc_wrapper/sv/AXI_fabric_0/addr_dec_mst_sel_0.sv
+$RTL_PATH/u1_noc_wrapper/sv/AXI_fabric_0/axi_addr_dec_0/axi_addr_dec_0.sv
+$RTL_PATH/u1_noc_wrapper/sv/AXI_fabric_0/axi_fabric_top_0.sv
+$RTL_PATH/u1_noc_wrapper/sv/AXI_fabric_0/AXI_fabric_0_wrapper.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_0/apb_addr_dec_0/apb_addr_dec_0.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_0/axi2apb_0.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_0/axi2apb_0_wrapper.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_1/apb_addr_dec_1/apb_addr_dec_1.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_1/axi2apb_1.sv
+$RTL_PATH/u1_noc_wrapper/sv/axi2apb_1/axi2apb_1_wrapper.sv
